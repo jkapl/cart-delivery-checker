@@ -47,7 +47,7 @@ const orderMyFood = async function () {
   // await page.screenshot({path: 'example6.png'});
   await page.$$eval('.ufss-slot-price-text', prices => prices.forEach(price => price.innerText !== 'Not available' ? price.click() : ''));
   await page.waitFor(10000);
-  // await page.screenshot({path: 'example7.png'});
+  await page.screenshot({path: 'example7.png'});
   
   await page.click('.a-button-input');
   // await page.click('.a-button-inner');
@@ -81,7 +81,11 @@ const orderMyFood = async function () {
   browser.close();
   }
 )};
-orderMyFood();
+try {
+  orderMyFood();
+} catch (err) {
+  throw(err);
+}
 
 // add selector by color
 //#f0c14b
@@ -94,7 +98,7 @@ async function waitForTime (page) {
     count = count + 1;
     console.log(`refresh #${count}`);
     if (count % 30 === 0) {
-      // await page.screenshot({path: `time-slot-example-${count/30}.png`})
+      await page.screenshot({path: `time-slot-example-${count/30}.png`})
     }
     await page.waitFor(5000)
     await page.reload({ waitUntil: ['networkidle0', 'domcontentloaded'] });
