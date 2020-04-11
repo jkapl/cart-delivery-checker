@@ -17,7 +17,7 @@ const orderMyFood = async function () {
   await page.goto(signInPage);
 
   await page.type('#ap_email', username);
-  // await page.screenshot({path: 'example.png'});
+
   await page.click('#continue')
   await page.waitFor(2000)
   //enter password page 
@@ -25,27 +25,24 @@ const orderMyFood = async function () {
   await page.click('#signInSubmit')
   await page.waitFor(2000)
   //homepage
-  // await page.screenshot({path: 'example2.png'});
+
   await page.click('#nav-cart');
   await page.waitFor(2000);
   //cart
   await page.click('.a-button-inner')
   await page.waitFor(2000)
   //before you checkout
-  // await page.screenshot({path: 'example3.png'});
+
   await page.click('a[name="proceedToCheckout"]')
   await page.waitFor(2000)
   //substitution preferences
-  // await page.screenshot({path: 'example4.png'});
-  // await page.click('input[class="a-button-input"');
+
   await page.click('.a-box-inner');
   await page.waitFor(10000);
   //Either schedule your order or reenter password page
-  // await page.screenshot({path: 'example5.png'});
-  // const pageText = await checkPageForTime(page);
-  await waitForTime(page);
-  // await page.screenshot({path: 'example6.png'});
-  await page.$$eval('.ufss-slot-price-text', prices => prices.forEach(price => price.innerText !== 'Not available' ? price.click() : ''));
+
+  await waitForTimeThenClick(page);
+
   await page.waitFor(10000);
   await page.screenshot({path: 'example7.png'});
   
@@ -53,14 +50,8 @@ const orderMyFood = async function () {
   // await page.click('.a-button-inner');
   
   await page.waitFor(15000);
-  // ------------------------
 
-  // await page.screenshot({path: 'example8.png'});
-  // let html = await page.content();
-  // fs.writeFileSync(path.join(__dirname, './page.html'), html);
-  // await page.click('.place-your-order-button');
-  // await page.click('.a-button-input');
-  // await page.click('.a-button-inner');
+
   await waitForTime(page);
   await page.click('.continue-buttons')
   await page.waitFor(10000);
@@ -74,8 +65,8 @@ const orderMyFood = async function () {
   
   await page.waitFor(10000);
 
-  // await page.screenshot({path: 'example10.png'})
-  await waitForTime(page);
+  await page.screenshot({path: 'example10.png'})
+  // await waitForTime(page);
   // html = await page.content();
   // fs.writeFileSync(path.join(__dirname, './page3.html'), html);
   browser.close();
@@ -87,11 +78,9 @@ orderMyFood();
 // add selector by color
 //#f0c14b
 
-async function waitForTime (page) {
-  let pageText = await page.$$eval('.a-alert-heading', alerts => alerts.map(alert => alert.innerText));
-  console.log(pageText[0]);
+async function waitForTimeThenClick (page) {
   let count = 0;
-  while (pageText[0] == 'Due to increased demand, available windows are limited. Please check back later or shop a Whole Foods Market near you.') {
+  while (await !checkTimeSlots(page)) {
     count = count + 1;
     console.log(`refresh #${count}`);
     if (count % 30 === 0) {
@@ -99,7 +88,16 @@ async function waitForTime (page) {
     }
     await page.waitFor(5000)
     await page.reload({ waitUntil: ['networkidle0', 'domcontentloaded'] });
-    pageText = await page.$$eval('.a-alert-heading', alerts => alerts.map(alert => alert.innerText));
   }
-  return true;
-}
+  await page.$$eval('.ufss-slot-price-text', prices => prices.forEach(price => price.innerText !== 'Not available' ? price.click() : ''));
+};
+
+async function checkTimeSlots (page) {
+  let prices = await page.$$eval('.ufss-slot-price-text', prices => prices.map(price => price.innerText));
+  for (let i = 0; i < prices.length; i++) {
+    if (prices[i] !== 'Not available') {
+      return true;
+    }
+  }
+  return false
+};
