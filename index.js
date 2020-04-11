@@ -81,11 +81,8 @@ const orderMyFood = async function () {
   browser.close();
   }
 )};
-try {
-  orderMyFood();
-} catch (err) {
-  throw(err);
-}
+
+orderMyFood();
 
 // add selector by color
 //#f0c14b
